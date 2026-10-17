@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Scratch Alchemist | Pure Culinary Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f1412;
+      color: #f3f4f6;
+    }
+    h1, h2, h3, .serif {
+      font-family: 'Playfair Display', serif;
+    }
+    .glass {
+      background: rgba(24, 32, 28, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .chip-active {
+      background-color: #10b981 !important;
+      color: #052e16 !important;
+      font-weight: 600;
+      border-color: #34d399 !important;
+    }
+    .kit-active {
+      background-color: #f59e0b !important;
+      color: #1c1917 !important;
+      font-weight: 600;
+      border-color: #fbbf24 !important;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f1412; }
+    ::-webkit-scrollbar-thumb { background: #26332d; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; color: black; }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <!-- TOP NAVIGATION & STATUS BAR -->
+  <header class="sticky top-0 z-40 glass border-b border-emerald-900/40 px-4 py-4 no-print">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl font-bold">
+          ✦
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white">The Scratch Alchemist</h1>
+          <p class="text-xs text-emerald-400/80">17 Oct Spec • Zero Wheat, Dairy, Egg, Soy, Legumes or Additives</p>
+        </div>
+      </div>
+
+      <!-- Borderline / Ask First Toggles & Shopping Cart Trigger -->
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="flex items-center gap-2 text-xs bg-stone-900/90 border border-stone-700 px-3 py-2 rounded-lg cursor-pointer hover:border-emerald-500/50 transition">
+          <input type="checkbox" id="toggleYoghurt" onchange="renderAll()" class="accent-emerald-500 rounded">
+          <span>Allow <strong>0% Greek Yoghurt</strong> <span class="text-amber-400">(TBC)</span></span>
+        </label>
+
+        <label class="flex items-center gap-2 text-xs bg-stone-900/90 border border-stone-700 px-3 py-2 rounded-lg cursor-pointer hover:border-emerald-500/50 transition">
+          <input type="checkbox" id="toggleLimited" onchange="renderAll()" class="accent-amber-500 rounded">
+          <span>Allow <strong>Ask-First</strong> <span class="text-stone-400">(Peas/Mango/Grapefruit)</span></span>
+        </label>
+
+        <button onclick="toggleCartModal()" class="relative bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition shadow-lg shadow-emerald-950/50">
+          <span>🛒 Shopping List</span>
+          <span id="cartCountBadge" class="bg-stone-950 text-emerald-400 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 pt-6 space-y-8 no-print">
+
+    <!-- SECTION 1: THE PANTRY ALCHEMIST & EQUIPMENT BAR -->
+    <section class="glass rounded-2xl p-6 shadow-2xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left 8 Cols: What's in the fridge/cupboard? -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>🧪 Pantry Alchemist: What do you have at home?</span>
+              </h2>
+              <p class="text-xs text-stone-400">Tap ingredients you currently have. Recipes will rank by match & auto-check what you own.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="clearPantry()" class="text-xs text-stone-400 hover:text-white underline px-2 py-1">Clear All</button>
+              <button onclick="openCustomGenerator()" class="text-xs bg-amber-500/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500/30 px-3 py-1.5 rounded-lg font-medium transition">
+                ✨ Synthesize Custom Meal from Selection
+              </button>
+            </div>
+          </div>
+
+          <!-- Ingredient Chip Categories -->
+          <div id="pantryChipsContainer" class="space-y-3 pt-1"></div>
+        </div>
+
+        <!-- Right 4 Cols: Kitchen Kit & Flavour Filters -->
+        <div class="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-stone-800 pt-4 lg:pt-0 lg:pl-6 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-amber-400">🔪 Your Kitchen Kit Filter</h3>
+            <p class="text-xs text-stone-400">Filter dishes by the tools you want to use tonight:</p>
+            <div id="kitFilterContainer" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="space-y-3 pt-2 border-t border-stone-800/80">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-emerald-400">🌶️ Style & Experimental Level</h3>
+            <div class="flex flex-wrap gap-2" id="styleFilterContainer">
+              <button onclick="setStyleFilter('ALL')" data-style="ALL" class="style-btn chip-active text-xs px-3 py-1.5 rounded-lg border border-stone-700 bg-stone-900">All Styles</button>
+              <button onclick="setStyleFilter('EXPERIMENTAL')" data-style="EXPERIMENTAL" class="style-btn text-xs px-3 py-1.5 rounded-lg border border-stone-700 bg-stone-900">⚡ Experimental</button>
+              <button onclick="setStyleFilter('FAST')" data-style="FAST" class="style-btn text-xs px-3 py-1.5 rounded-lg border border-stone-700 bg-stone-900">⏱️ Under 25 Mins</button>
+            </div>
+          </div>
+
+          <!-- Dietary Safety Shield Banner -->
+          <div class="bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-3 text-xs text-emerald-200/90 space-y-1">
+            <div class="font-semibold text-emerald-400 flex items-center gap-1.5">
+              <span>🛡️ Active Safety Lock</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-stone-300">
+              Hard-blocking: Eggs, peanuts, wheat, white rice, corn/maize, dairy, soy, legumes, refined sugar, monkfish, squid, basa, and packet sauces.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- DYNAMIC CUSTOM MEAL SYNTHESIZER (Hidden until triggered) -->
+    <section id="customSynthPanel" class="hidden glass rounded-2xl p-6 border-2 border-amber-500/40 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">On-Demand Kitchen Lab</span>
+          <h2 class="text-2xl font-bold text-white" id="synthTitle">Bespoke Pantry Creation</h2>
+        </div>
+        <button onclick="document.getElementById('customSynthPanel').classList.add('hidden')" class="text-stone-400 hover:text-white text-sm">✕ Close</button>
+      </div>
+      <div id="synthContent"></div>
+    </section>
+
+    <!-- SECTION 2: RECIPE CARDS GRID -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Curated Experimental & Scratch Dishes</h2>
+        <span id="recipeCountText" class="text-xs text-stone-400"></span>
+      </div>
+
+      <div id="recipesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+  </main>
+
+  <!-- RECIPE DETAIL MODAL -->
+  <div id="recipeModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="glass max-w-4xl w-full rounded-2xl overflow-hidden border border-stone-700 shadow-2xl my-8 max-h-[92vh] flex flex-col">
+      <div id="recipeModalBody" class="overflow-y-auto p-6 space-y-6"></div>
+    </div>
+  </div>
+
+  <!-- SHOPPING LIST DRAWER / MODAL -->
+  <div id="cartModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-end">
+    <div class="bg-stone-950 border-l border-stone-800 w-full max-w-lg h-full flex flex-col justify-between p-6 overflow-y-auto">
+      <div class="space-y-6">
+        <div class="flex items-center justify-between border-b border-stone-800 pb-4 no-print">
+          <div>
+            <h2 class="text-2xl font-bold text-white">Shopping List</h2>
+            <p class="text-xs text-emerald-400">100% Compliant Scratch Ingredients</p>
+          </div>
+          <button onclick="toggleCartModal()" class="text-stone-400 hover:text-white text-lg px-2">✕</button>
+        </div>
+
+        <!-- Add Custom Compliant Item -->
+        <div class="flex gap-2 no-print">
+          <input type="text" id="customCartInput" placeholder="Add extra allowed item (e.g. Green apples)..." class="flex-1 bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          <button onclick="addCustomCartItem()" class="bg-stone-800 hover:bg-stone-700 text-emerald-400 px-4 py-2 rounded-lg text-sm font-semibold">+ Add</button>
+        </div>
+
+        <!-- Grouped List Items -->
+        <div id="cartItemsContainer" class="space-y-4"></div>
+      </div>
+
+      <!-- Export Actions Footer -->
+      <div class="border-t border-stone-800 pt-4 space-y-3 no-print">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="copyShoppingList()" class="bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+            📋 Copy to Clipboard
+          </button>
+          <button onclick="shareShoppingList()" class="bg-stone-800 hover:bg-stone-700 text-white font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+            📲 Share to Phone / Notes
+          </button>
+          <button onclick="downloadShoppingListTxt()" class="bg-stone-800 hover:bg-stone-700 text-stone-200 font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+            ⬇️ Download .TXT
+          </button>
+          <button onclick="window.print()" class="bg-stone-800 hover:bg-stone-700 text-stone-200 font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+            🖨️ Print / Save PDF
+          </button>
+        </div>
+        <button onclick="clearShoppingList()" class="w-full text-center text-xs text-rose-400 hover:underline py-1">Clear Entire Shopping List</button>
+        <p id="exportFeedback" class="text-center text-xs text-emerald-400 hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. PANTRY & EQUIPMENT DEFINITIONS
+    // ==========================================
+    const PANTRY_CATEGORIES = {
+      "Proteins": ["Chicken", "Salmon", "Sea Bass", "Cod", "Trout", "Hake", "Tuna"],
+      "Grains & Flours": ["Quinoa", "Brown Rice", "Oats", "Millet Flour", "100% Brown Rice Pasta"],
+      "Veg & Salad": ["Mushrooms", "Tomatoes", "Cucumber", "Radishes", "Avocado", "Potatoes", "Salad Leaves"],
+      "Fruits": ["Green Apple", "Lemon", "Lime", "Orange", "Blackberries", "Raspberries", "Blueberries", "Strawberries", "Pomegranate"],
+      "Nuts, Seeds & Pantry": ["Walnuts", "Almonds", "Pistachios", "Sunflower Seeds", "Pumpkin Seeds", "Sesame Seeds", "Pine Nuts", "Olive Oil", "Balsamic Vinegar", "Garlic", "Cumin", "Chilli Flakes", "Honey", "Maple Syrup"]
+    };
+
+    const KITCHEN_KIT = ["Air Fryer", "Mandoline", "Frying Pan", "Oven", "Pot", "Toaster"];
+
+    // State
+    let ownedPantry = new Set(["Olive Oil", "Garlic", "Cumin", "Chilli Flakes"]); // Default staples
+    let activeKitFilters = new Set();
+    let activeStyleFilter = "ALL";
+    let shoppingList = []; // { name, amount, category, recipeTitle, checked }
+
+    // ==========================================
+    // 2. CURATED EXPERIMENTAL RECIPE DATABASE
+    // ==========================================
+    const RECIPES = [
+      {
+        id: "walnut-chicken-carpaccio",
+        title: "Air-Fried Walnut & Millet Chicken over Mandoline Apple-Radish Carpaccio",
+        subtitle: "Shatteringly crisp seed-crusted chicken strips with a translucent, icy-crisp shaved salad",
+        experimentalLevel: 3,
+        prepTime: "15 mins",
+        cookTime: "12 mins",
+        kit: ["Air Fryer", "Mandoline"],
+        imagePrompt: "Gourmet plated walnut and oat crusted crispy air fried chicken tenders over paper thin translucent mandoline sliced green apple and red radish carpaccio salad with avocado lime drops and ruby pomegranate seeds on dark ceramic plate, food photography",
+        fallbackImg: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80",
+        requiresYoghurt: false,
+        requiresLimited: false,
+        kitCallouts: {
+          "Air Fryer": "200°C for 11–12 mins (turn halfway). No egg needed—a thin brush of olive oil & honey binds the walnut-millet crust.",
+          "Mandoline": "Set to 1.5mm (Setting 1) for wafer-thin, curling ribbons of green apple, cucumber, and radish."
+        },
+        ingredients: [
+          { name: "Chicken", detail: "400g chicken breast, sliced into mini fillets", category: "Proteins" },
+          { name: "Walnuts", detail: "65g raw walnuts, finely crushed", category: "Nuts & Seeds" },
+          { name: "Oats", detail: "3 tbsp rolled oats, pulsed into rough crumbs", category: "Grains & Flours" },
+          { name: "Millet Flour", detail: "2 tbsp millet flour", category: "Grains & Flours" },
+          { name: "Green Apple", detail: "1 crisp green apple, cored", category: "Fruit & Veg" },
+          { name: "Radishes", detail: "6 fresh radishes, trimmed", category: "Fruit & Veg" },
+          { name: "Cucumber", detail: "1/2 cucumber", category: "Fruit & Veg" },
+          { name: "Pomegranate", detail: "2 tbsp pomegranate seeds", category: "Fruit & Veg" },
+          { name: "Lime", detail: "1 juicy lime (zest and juice)", category: "Fruit & Veg" },
+          { name: "Honey", detail: "1 tsp pure runny honey", category: "Oils & Spices" },
+          { name: "Cumin", detail: "1 tsp ground cumin", category: "Oils & Spices" },
+          { name: "Chilli Flakes", detail: "1/2 tsp crushed chilli flakes", category: "Oils & Spices" },
+          { name: "Olive Oil", detail: "2 tbsp extra virgin olive oil", category: "Oils & Spices" }
+        ],
+        steps: [
+          "Lock your **Mandoline** to 1.5mm. Shave the green apple, radishes, and cucumber into translucent discs/ribbons. Toss immediately in a bowl with half the lime juice and a pinch of salt to keep them icy crisp.",
+          "In a shallow dish, mix the finely crushed walnuts, pulsed oats, millet flour, ground cumin, chilli flakes, salt, and black pepper.",
+          "Whisk 1 tbsp olive oil with 1 tsp honey and the lime zest. Brush onto the chicken strips (this acts as our egg-free binder), then press firmly into the walnut-millet crumb.",
+          "Preheat the **Air Fryer** to 200°C. Arrange the crusted chicken in a single layer and air-fry for 11–12 minutes until deeply golden and shattering.",
+          "Arrange the cold mandoline carpaccio on dark plates, stack the hot crispy chicken on top, scatter with pomegranate jewels, and finish with your chosen scratch sauce below."
+        ],
+        sauceVariations: [
+          {
+            name: "Avocado-Lime Silk (Default)",
+            desc: "Blend 1/2 ripe avocado, juice of 1/2 lime, 2 tbsp cold water, 1 tbsp olive oil, and a pinch of cumin until glossy and pipeable."
+          },
+          {
+            name: "Charred Orange & Chilli Gastrique",
+            desc: "Air-fry half an orange alongside the chicken for 8 mins, then squeeze its warm caramelised juice with 1 tsp balsamic vinegar and chilli flakes."
+          },
+          {
+            name: "0% Greek Yoghurt Mint Whip (If Yoghurt Confirmed)",
+            desc: "Whisk 3 tbsp 0% Greek yoghurt with grated garlic, finely chopped mint/herbs, and lemon zest."
+          }
+        ]
+      },
+      {
+        id: "cod-potato-scales",
+        title: "Cod Loin with Mandoline 'Potato Scales' & Blackberry-Balsamic Glaze",
+        subtitle: "High-end bistro technique: wafer-thin potato shingles air-fried into a golden crust over flaky cod",
+        experimentalLevel: 3,
+        prepTime: "18 mins",
+        cookTime: "10 mins",
+        kit: ["Mandoline", "Air Fryer", "Frying Pan"],
+        imagePrompt: "Fine dining cod fillet topped with overlapping golden crispy wafer thin mandoline potato scales surrounded by a dark glossy blackberry balsamic reduction and micro herbs on a slate plate, restaurant food photography",
+        fallbackImg: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1000&q=80",
+        requiresYoghurt: false,
+        requiresLimited: false,
+        kitCallouts: {
+          "Mandoline": "Set to 1mm (ultra-thin) so the small allowance of potato curves like fish scales and crisps in 9 minutes.",
+          "Air Fryer": "195°C for 9–10 mins—blisters the potato scales while steaming the cod underneath in its own juices."
+        },
+        ingredients: [
+          { name: "Cod", detail: "2 thick cod loin fillets (approx. 180g each)", category: "Proteins" },
+          { name: "Potatoes", detail: "1 small waxy potato (small permitted allowance, ~90g)", category: "Fruit & Veg" },
+          { name: "Blackberries", detail: "80g fresh blackberries", category: "Fruit & Veg" },
+          { name: "Balsamic Vinegar", detail: "1.5 tbsp balsamic vinegar", category: "Oils & Spices" },
+          { name: "Garlic", detail: "1 clove garlic, crushed", category: "Oils & Spices" },
+          { name: "Olive Oil", detail: "1.5 tbsp olive oil", category: "Oils & Spices" },
+          { name: "Salad Leaves", detail: "2 handfuls crisp salad leaves", category: "Fruit & Veg" },
+          { name: "Sunflower Seeds", detail: "1 tbsp toasted sunflower seeds", category: "Nuts & Seeds" }
+        ],
+        steps: [
+          "Use the **Mandoline** on the thinnest 1mm setting to slice the small potato into paper-thin rounds. Pat dry thoroughly on kitchen paper and toss with 1 tsp olive oil and sea salt.",
+          "Season the cod fillets with salt and pepper. Overlap the potato rounds on top of each cod fillet in neat rows so they resemble fish scales.",
+          "Place gently into the **Air Fryer** basket at 195°C for 9–10 minutes until the potato scales are golden brown and crisp on the edges and the cod flakes easily.",
+          "Meanwhile, in a **Frying Pan**, warm the blackberries, balsamic vinegar, crushed garlic, and a splash of water over medium heat for 4 minutes. Crush the berries with a spoon and strain (or leave rustic) for a glossy purple-black reduction.",
+          "Spoon a pool of the warm blackberry glaze onto plates, set the crispy-scaled cod on top, and garnish with salad leaves and toasted sunflower seeds."
+        ],
+        sauceVariations: [
+          {
+            name: "Blackberry & Balsamic Reduction (Default)",
+            desc: "Tart blackberries simmered with balsamic
